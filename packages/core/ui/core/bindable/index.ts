@@ -190,23 +190,23 @@ export class Binding {
 	}
 
 	private bindingContextChanged(data: PropertyChangeData): void {
-		const target = this.targetOptions.instance.get();
-		if (!target) {
-			this.unbind();
-
-			return;
-		}
-
-		const value = data.value;
-		if (value !== null && value !== undefined) {
-			this.update(value);
-		} else {
-			// TODO: Is this correct?
-			// What should happen when bindingContext is null/undefined?
-			this.clearBinding();
-		}
-
-		// TODO: if oneWay - call target.unbind();
+		if(this.targetOptions !== undefined && this.targetOptions !== null){
+            var target = this.targetOptions.instance.get();
+            if (!target) {
+                this.unbind();
+                return;
+            }
+            var value = data.value;
+            if (value !== null && value !== undefined) {
+                this.update(value);
+            }
+            else {
+                this.clearBinding();
+            }
+        } else {
+            this.unbind();
+            return;
+        }
 	}
 
 	public bind(source: any): void {
@@ -239,27 +239,25 @@ export class Binding {
 	}
 
 	public unbind() {
-		const target = this.targetOptions.instance.get();
-		if (target instanceof Observable) {
-			if (this.options.twoWay) {
-				target.off(`${this.targetOptions.property}Change`, this.onTargetPropertyChanged, this);
-			}
-
-			if (this.sourceIsBindingContext && this.targetOptions.property !== 'bindingContext') {
-				target.off('bindingContextChange', this.bindingContextChanged, this);
-			}
-		}
-
-		if (this.targetOptions) {
-			this.targetOptions = undefined;
-		}
-
-		this.sourceProperties = undefined;
-		if (!this.source) {
-			return;
-		}
-
-		this.clearSource();
+		if(this.targetOptions !== undefined && this.targetOptions !== null){
+            var target = this.targetOptions.instance.get();
+            if (target instanceof observable_1.Observable) {
+                if (this.options.twoWay) {
+                    target.off(this.targetOptions.property + "Change", this.onTargetPropertyChanged, this);
+                }
+                if (this.sourceIsBindingContext && this.targetOptions.property !== "bindingContext") {
+                    target.off("bindingContextChange", this.bindingContextChanged, this);
+                }
+            }
+        }
+        if (this.targetOptions) {
+            this.targetOptions = undefined;
+        }
+        this.sourceProperties = undefined;
+        if (!this.source) {
+            return;
+        }
+        this.clearSource();
 	}
 
 	// Consider returning single {} instead of array for performance.
